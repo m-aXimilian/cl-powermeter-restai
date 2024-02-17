@@ -1,0 +1,17 @@
+* Cl.Powermeter.Restapi 
+
+** Usage
+
+** Installation
+
+** Author
+
++ Maximilian Kueffner (kueffnermax@gmail.com)
+
+** Copyright
+
+Copyright (c) 2024 Maximilian Kueffner (kueffnermax@gmail.com)
+
+** License
+
+Licensed under the LGPL License.
