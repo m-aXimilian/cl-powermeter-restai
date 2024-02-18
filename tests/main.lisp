@@ -18,3 +18,10 @@
 
 (test invalid-obis-gives-nil
   (is-false (obis->uid "0xff.0x00.1" *uid-obis-code-alist/tests*)))
+
+(test power-calculations-alist-default-uninitialized
+  (is-false *power-calculation-alist*))
+
+(def-test power-calculations-alist-not-empty-when-initialized ()
+  (with-fixture setup-power-calculation-alist ()
+        (is (> (length *power-calculation-alist*) 0))))

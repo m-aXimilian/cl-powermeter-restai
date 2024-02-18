@@ -11,3 +11,8 @@
      . "2.8.2"))
   "A map of obis codes and respective ids. This should match the ids
 from an api that can be called to fetch (json) data for the respective codes.")
+
+(def-fixture setup-power-calculation-alist ()
+  (initialize-power-calculations)
+  (&body)
+  (setf *power-calculation-alist* nil))
