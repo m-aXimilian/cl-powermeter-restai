@@ -19,8 +19,8 @@
 (test invalid-obis-gives-nil
   (is-false (obis->uid "0xff.0x00.1" *uid-obis-code-alist/tests*)))
 
-(test power-calculations-alist-default-uninitialized
-  (is-false *power-calculation-alist*))
+(test power-calculations-alist-default-initialized
+  (is (not (eq nil *power-calculation-alist*))))
 
 (def-test power-calculations-alist-gets-reset-when-requested ()
   (with-fixture double-initialize-calculation-alist ()
@@ -36,5 +36,6 @@
   (with-fixture setup-power-calculation-alist ()
     (is (power-calculation-with-uid "a039408b-b369-40f2-ba22-c20bdf4b24fb"))))
 
-(test power-calculation-object-not-when-unitialized
-  (is-false (power-calculation-with-uid "a039408b-b369-40f2-ba22-c20bdf4b24fb")))
+(def-test power-calculation-object-not-when-unitialized ()
+  (with-fixture ensure-empty-calculation-alist ()
+      (is-false (power-calculation-with-uid "a039408b-b369-40f2-ba22-c20bdf4b24fb"))))
