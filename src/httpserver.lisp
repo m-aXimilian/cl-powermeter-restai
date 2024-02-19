@@ -5,6 +5,10 @@
   (check-type calc power-calculation)
   (cl-json:encode-json-to-string calc))
 
+;; THIS IS A BUG currently:
+;; The "power-with-id" name is imortant here and cannot be redefined.
+;; The uri must match the name of the symbol (in this case "power-with-id")
+;; Using (gensym) does not work here. -> somehow use a macro?
 (defun powermeter/easy-handler-power-from-id (id)
   "Generate an `hunchentoot:define-easy-handler' that handles the uri `id'.
 
