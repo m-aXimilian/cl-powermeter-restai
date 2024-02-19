@@ -22,7 +22,7 @@ table.summary tr.subheading { background-color: #aaaaff}
 table.summary tr.subheading td { text-align: left; font-weight: bold; padding-left: 5ex; }
 </style></head><body><h3>Coverage report: /Users/max/repos/cl.powermeter.restapi/tests/testparameters.lisp <br />
 </h3>
-<table class='summary'><tr class='head-row'><td width='80px'>Kind</td><td width='80px'>Covered</td><td width='80px'>All</td><td width='80px'>%</td><tr class='odd'><td>expression</td><td>4</td><td>4</td><td>100.0</td></tr>
+<table class='summary'><tr class='head-row'><td width='80px'>Kind</td><td width='80px'>Covered</td><td width='80px'>All</td><td width='80px'>%</td><tr class='odd'><td>expression</td><td>5</td><td>5</td><td>100.0</td></tr>
 <tr class='even'><td>branch</td><td>0</td><td>0</td><td>nil  </td></tr>
 </table><div class='key'><b>Key</b><br />
 <div class='state-0'>Not instrumented</div><div class='state-15'>Conditionalized out</div><div class='state-1'>Executed</div><div class='state-2'>Not executed</div><div>&#160;</div><div class='state-5'>Both branches taken</div><div class='state-6'>One branch taken</div><div class='state-10''>Neither branch taken</div></div><nobr><div><code>
@@ -44,4 +44,12 @@ table.summary tr.subheading td { text-align: left; font-weight: bold; padding-le
 <nobr><div class='source'><div class='line-number'><code>15</code></div><code>&#160;<span class='state-1'>&#40;def&#45;fixture&#160;setup&#45;power&#45;calculation&#45;alist&#160;&#40;&#41;</span><span class='state-0'></span></code></div></nobr>
 <nobr><div class='source'><div class='line-number'><code>16</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#40;initialize&#45;power&#45;calculations&#160;&#58;reset&#160;t&#41;</span><span class='state-0'></span></code></div></nobr>
 <nobr><div class='source'><div class='line-number'><code>17</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#40;&#38;body&#41;</span><span class='state-0'></span></code></div></nobr>
-<nobr><div class='source'><div class='line-number'><code>18</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#40;setf&#160;&#42;power&#45;calculation&#45;alist&#42;&#160;nil&#41;&#41;</code></div></body></html>
+<nobr><div class='source'><div class='line-number'><code>18</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#40;setf&#160;&#42;power&#45;calculation&#45;alist&#42;&#160;nil&#41;&#41;</span><span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>19</code></div><code>&#160;<span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>20</code></div><code>&#160;<span class='state-1'>&#40;def&#45;fixture&#160;double&#45;initialize&#45;calculation&#45;alist&#160;&#40;&#41;</span><span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>21</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#40;let&#160;&#40;&#40;restore&#160;&#42;power&#45;calculation&#45;alist&#42;&#41;&#41;</span><span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>22</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#160;&#160;&#40;setf&#160;&#42;power&#45;calculation&#45;alist&#42;&#160;nil&#41;</span><span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>23</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#160;&#160;&#40;initialize&#45;power&#45;calculations&#41;</span><span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>24</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#160;&#160;&#40;initialize&#45;power&#45;calculations&#41;</span><span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>25</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#160;&#160;&#40;&#38;body&#41;</span><span class='state-0'></span></code></div></nobr>
+<nobr><div class='source'><div class='line-number'><code>26</code></div><code>&#160;<span class='state-1'>&#160;&#160;&#160;&#160;&#40;setf&#160;&#42;power&#45;calculation&#45;alist&#42;&#160;restore&#41;&#41;&#41;</code></div></body></html>

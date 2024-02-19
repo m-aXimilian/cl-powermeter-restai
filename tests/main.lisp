@@ -22,6 +22,12 @@
 (test power-calculations-alist-default-uninitialized
   (is-false *power-calculation-alist*))
 
+(def-test power-calculations-alist-gets-reset-when-requested ()
+  (with-fixture double-initialize-calculation-alist ()
+    (let ((double-init-length (length *power-calculation-alist*)))
+      (initialize-power-calculations :reset t)
+      (is (< (length *power-calculation-alist*) double-init-length)))))
+
 (def-test power-calculations-alist-not-empty-when-initialized ()
   (with-fixture setup-power-calculation-alist ()
     (is (> (length *power-calculation-alist*) 0))))
