@@ -24,4 +24,11 @@
 
 (def-test power-calculations-alist-not-empty-when-initialized ()
   (with-fixture setup-power-calculation-alist ()
-        (is (> (length *power-calculation-alist*) 0))))
+    (is (> (length *power-calculation-alist*) 0))))
+
+(def-test power-calculation-object-discoverable ()
+  (with-fixture setup-power-calculation-alist ()
+    (is (power-calculation-with-uid "a039408b-b369-40f2-ba22-c20bdf4b24fb"))))
+
+(test power-calculation-object-not-when-unitialized
+  (is-false (power-calculation-with-uid "a039408b-b369-40f2-ba22-c20bdf4b24fb")))

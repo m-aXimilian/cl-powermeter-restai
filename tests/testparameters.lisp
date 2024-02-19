@@ -13,6 +13,6 @@
 from an api that can be called to fetch (json) data for the respective codes.")
 
 (def-fixture setup-power-calculation-alist ()
-  (initialize-power-calculations)
+  (initialize-power-calculations :reset t)
   (&body)
   (setf *power-calculation-alist* nil))

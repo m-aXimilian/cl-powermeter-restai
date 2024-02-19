@@ -11,6 +11,7 @@
                  (:file "parameters")
                  (:file "powercalculation")
                  (:file "domaininit")
+                 (:file "httpserver")
                  (:file "main"))))
   :description ""
   :in-order-to ((test-op (test-op "cl.powermeter.restapi/tests"))))

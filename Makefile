@@ -8,6 +8,9 @@ test:
 	--eval '(in-suite restapi.main)' \
 	--eval '(run!)' \
 
+coverage:
+	$(LISP) --non-interactive --load ./scripts/coverage.lisp
+
 clean:
 	rm -rf build
 

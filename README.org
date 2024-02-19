@@ -1,3 +1,6 @@
+[[https://gitlab.com/m-aXimilian/cl-powermeter-restapi/badges/dev/pipeline.svg]]
+
+
 * Cl.Powermeter.Restapi 
 
 ** Usage

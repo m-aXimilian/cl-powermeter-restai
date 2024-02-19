@@ -7,4 +7,5 @@
    :*server-host-ip*
    :*server-host-port-power-calculations*
    :*uid-obis-code-alist*
-   :*power-calculation-alist*))
+   :*power-calculation-alist*
+   :power-calculation-with-uid))
