@@ -6,6 +6,9 @@
 (defparameter *server-host-port-power-calculations* 8771
   "The port where power calculations will be broadcasted.")
 
+(defparameter *http-acceptor* (make-instance 'hunchentoot:easy-acceptor :port *server-host-port-power-calculations*)
+  "The acceptor 'endpoint'.")
+
 (defparameter *uid-obis-code-alist*
   '(("a039408b-b369-40f2-ba22-c20bdf4b24fb"
      . "1.8.1")

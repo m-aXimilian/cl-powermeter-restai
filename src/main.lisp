@@ -1,7 +1,9 @@
 (in-package :cl.powermeter.restapi)
 
+;; initalize calculation objects
 (initialize-power-calculations)
 
+;; setup handler for the obis-code map
 (dolist (pair *uid-obis-code-alist*)
   (powermeter/easy-handler-power-from-id (car pair)))
 
@@ -18,4 +20,6 @@
 ;;            (format stream "~a" (json-string-from-calculation (power-calculation-with-uid "a039408b-b369-40f2-ba22-c20bdf4b24fb")))
 ;;            )))
 
-(hunchentoot:start (make-instance 'hunchentoot:easy-acceptor :port *server-host-port-power-calculations*))
+
+;; start the server
+(hunchentoot:start *http-acceptor*)
