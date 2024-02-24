@@ -24,6 +24,12 @@ from an api that can be called to fetch (json) data for the respective codes.")
 (defparameter *power-calculation-alist* nil
   "Intended as an alist with cons-cell semantic '(obis-code . `power-calculation')'.")
 
+(defparameter *meter-reading-ip* nil
+  "The ip address where we can fetch meter reading data.")
+
+(defparameter *meter-reading-port* nil
+  "The port of the meter reading api.")
+
 (defun obis->uid (obis &optional (uid-obis-map *uid-obis-code-alist*))
   "Gives the corresponding uid for a given `obis' code.
 
