@@ -36,16 +36,7 @@ can be used to query meter readings.")
     :initarg :server-port
     :initform 8080
     :documentation "The port of the RESTAPI. Defaults to 8080.")
-   (loop-running-p
-    :initarg :loop-running-p
-    :initform nil
-    :documentation "Statusflag inidicating whether the a query-loop is running.
-Setfable; when T, you can set it to NIL in order to stop the loop.")
-   (query-frequency
-    :initarg :query-frequency
-    :initform 0.005
-    :documentation "The frequency in Hz indicating a 'sleep' time for the loop.
-Is in use only when `loop-running-p' is T.")))
+   ))
 
 (defclass meter-request-mock (restapi-request-service)
   ((energy-log
@@ -63,24 +54,43 @@ Is in use only when `loop-running-p' is T.")))
     :type restapi-request-service
     :documentation "A handler for calculating power from energy readings.")
    (last-read
-    :type number
+    :initform nil
     :documentation "The last reading.")
    (power
     :type number
-    :documentation "The calculated power.")))
+    :documentation "The calculated power.")
+   (loop-running-p
+    :initarg :loop-running-p
+    :initform nil
+    :documentation "Statusflag inidicating whether the a query-loop is running.
+Setfable; when T, you can set it to NIL in order to stop the loop.")
+   (query-frequency
+    :initarg :query-frequency
+    :initform 0.005
+    :documentation "The frequency in Hz indicating a 'sleep' time for the loop.
+Is in use only when `loop-running-p' is T.")))
 
 (defgeneric query-api (reader uri)
   (:documentation "Get a json encoded api response from the url specified in `uri'."))
 
-(defgeneric start-query-loop (reader)
-  (:documentation "Starts a request loop on the configured api."))
 
-(defgeneric calculate-power (calculator)
+(defgeneric calculate-power (calculator uid)
   (:documentation "Calculate power from subsequent meter readings."))
 
-(defmethod calculate-power (calculator power-calculator)
-  (let ((last (slot-value calculator 'last-read)))
-    ()))
+(defmethod calculate-power ((calculator power-calculator) uid)
+  (let ((last (slot-value calculator 'last-read))
+        (current (query-api (slot-value calculator 'meter-api) uid)))
+    (cond
+      ((eq last nil) (setf (slot-value calculator 'last-read)
+                           current))
+      (t (progn
+           (let  ((tmp-power (* 3600000.0 (/ (- (slot-value current 'energy) (slot-value last 'energy))
+                                             (- (slot-value current 'timestamp) (slot-value last 'timestamp))))))
+             (when (not (= 0 tmp-power))
+               (setf (slot-value calculator 'power) tmp-power)
+               (setf (slot-value calculator 'last-read) current)
+               (setf (slot-value (power-calculation-with-uid uid) 'power) tmp-power)
+               (setf (slot-value (power-calculation-with-uid uid) 'timestamp) (slot-value current 'timestamp)))))))))
 
 (defmethod query-api ((reader restapi-request-service) uri)
   (error "query-api is not defined on the interface."))
