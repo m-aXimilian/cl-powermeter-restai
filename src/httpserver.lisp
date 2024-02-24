@@ -19,3 +19,41 @@ Tries to answer get requests by a json-encoded `power-calculation' corresponding
            (format stream "~a" (json-string-from-calculation (power-calculation-with-uid id)))
            ))))
 
+;; the problem is that on macro expansion the (gensym) is evaluated and stays
+;; static within that lexical context (that is, i.e., a loop)
+;; there has to be a way to force recreating that 
+(defmacro spawn-hunchentoot-easy-handler (uri)
+  (let* ((uniquri (gensym))
+         (uripath (gensym))
+         (fname (gensym)))
+    `(let* ((,uniquri ,uri)
+            (,uripath (concatenate 'string "/" ,uniquri))
+            (,fname (gensym)))
+       (hunchentoot:define-easy-handler ((gensym) :uri ,uripath) ()
+         (with-output-to-string (stream)
+           (format stream "~a" (json-string-from-calculation (power-calculation-with-uid ,uniquri))))))))
+
+;; (defmacro auto-named-easy-handler (id)
+;;   (let ((methodname (gensym))
+;;         (idsym (gensym))
+;;         (mstream (gensym)))
+;;     `(let ((,idsym ,(eval id))
+;;        (hunchentoot:define-easy-handler
+;;            (,methodname :uri (concatenate 'string "/" ,idsym)) ()
+;;          (let ((*print-pretty* t))
+;;            (with-output-to-string (,mstream)
+;;              (format ,mstream "~a" (json-string-from-calculation (power-calculation-with-uid ,idsym)))
+;;              ))))))
+
+
+(defmacro gen-named-easy-handler (id name)
+  `(hunchentoot:define-easy-handler
+       (,name :uri (concatenate 'string "/" ,id)) ()
+     (let ((*print-pretty* t))
+       (with-output-to-string (stream)
+         (format stream "~a" (json-string-from-calculation (power-calculation-with-uid ,id)))
+         ))))
+
+
+
+
