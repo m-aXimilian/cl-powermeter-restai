@@ -1,11 +1,11 @@
 (in-package :cl.powermeter.restapi/tests)
 
 (def-suite restapi.main
-  :description "Testing the parameters of `cl.powermeter.restapi/tests'.")
+  :description "Test collection for the `cl.powermeter.restapi' system.")
 
 (def-suite* restapi.main/parameters
   :in restapi.main
-  :description "Global tests for the line parser.")
+  :description "Testing the parameters of `cl.powermeter.restapi/tests'.")
 
 (test finds-uid-from-obis-code
   (is (obis->uid "1.8.1" *uid-obis-code-alist/tests*)))
@@ -19,8 +19,8 @@
 (test invalid-obis-gives-nil
   (is-false (obis->uid "0xff.0x00.1" *uid-obis-code-alist/tests*)))
 
-(test power-calculations-alist-default-initialized
-  (is (not (eq nil *power-calculation-alist*))))
+(test power-calculations-alist-default-uninitialized
+  (is-false *power-calculation-alist*))
 
 (def-test power-calculations-alist-gets-reset-when-requested ()
   (with-fixture double-initialize-calculation-alist ()
