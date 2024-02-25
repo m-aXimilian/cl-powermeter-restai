@@ -31,3 +31,52 @@ from an api that can be called to fetch (json) data for the respective codes.")
     (setf *power-calculation-alist* nil)
     (&body)
     (setf *power-calculation-alist* restore)))
+
+(defclass meter-request-mock-constant-power (restapi-request-service)
+  ((energy-log
+    :initarg :energy-log
+    :initform 0
+    :accessor energy-log
+    :documentation "The saved energy reading to increment.")
+   (last-read
+    :initarg :last-read
+    :initform nil
+    :accessor last-read
+    :documentation "Last meter reading.")
+   (target-power
+    :initarg :target-power
+    :initform 1
+    :accessor target-power
+    :documentation "Gives the desired power and thus determines energy increments (in kW).")
+   (sleep-time
+    :initarg :sleep-time
+    :initform 5
+    :accessor sleep-time
+    :documentation "Time between api-calls."))
+  (:documentation "A mock implementation of `restapi-request-service' with energy increments of a fixed power."))
+
+(defmethod query-api ((reader meter-request-mock-constant-power) uri)
+  "Ensures an energy increment to target a static mean power in `uri'."
+  (labels ((get-energy-inc (reader)
+             (let ((now (get-universal-time)))
+               (list now
+                     (+ (* (target-power reader) (/ (- now (timestamp (last-read reader))) 3600000)) (energy (last-read reader)))))))
+    (cond
+      ((eq nil (last-read reader))
+       (let ((initial (cl.powermeter.restapi::generate-meter-reading (cdr (assoc :data `((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
+                                                                                                              (:DATA
+                                                                                                               ((:UUID . ,uri)
+                                                                                                                (:LAST . ,(get-universal-time))
+                                                                                                                (:INTERVAL . -1)
+                                                                                                                (:PROTOCOL . "d0")
+                                                                                                                (:TUPLES (,(get-universal-time) ,(slot-value reader 'energy-log)))))))))))
+         (setf (last-read reader) initial)
+         initial))
+      (t (let ((needed-inc (get-energy-inc reader)))
+           (cl.powermeter.restapi::generate-meter-reading (cdr (assoc :data `((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
+                                                                                                      (:DATA
+                                                                                                       ((:UUID . ,uri)
+                                                                                                        (:LAST . ,(car needed-inc))
+                                                                                                        (:INTERVAL . -1)
+                                                                                                        (:PROTOCOL . "d0")
+                                                                                                        (:TUPLES (,(car needed-inc) ,(cadr needed-inc))))))))))))))

@@ -26,7 +26,8 @@
                 :components
                 ((:file "package")
                  (:file "testparameters")
-                 (:file "main"))))
+                 (:file "main")
+                 (:file "powercalculationtests"))))
   :description "Test system for cl.powermeter.restapi"
   :perform (test-op (op c)
 		    (symbol-call :fiveam :run!

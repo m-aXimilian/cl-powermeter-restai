@@ -1,5 +1,8 @@
 (in-package :cl.powermeter.restapi)
 
+(defconstant +time-diff-factor+ 3600000.0
+  "Factor to get from ms and W to h and kW.")
+
 (defparameter *server-host-ip* "localhost"
   "The ip address that gets served.")
 
@@ -29,6 +32,9 @@ from an api that can be called to fetch (json) data for the respective codes.")
 
 (defparameter *meter-reading-port* nil
   "The port of the meter reading api.")
+
+(defparameter *meter-transformer-ratio* 20
+  "The transformer ratio used with the electricity meter.")
 
 (defun obis->uid (obis &optional (uid-obis-map *uid-obis-code-alist*))
   "Gives the corresponding uid for a given `obis' code.

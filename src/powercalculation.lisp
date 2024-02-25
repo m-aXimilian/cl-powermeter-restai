@@ -52,6 +52,7 @@ can be used to query meter readings.")
   ((energy-log
     :initarg :energy-log
     :initform 0
+    :accessor energy-log
     :documentation "The saved energy reading to increment."))
   (:documentation "A mock implementation of `restapi-request-service'."))
 
@@ -102,8 +103,12 @@ Is in use only when `loop-running-p' is T.")
       ((eq last nil) (setf (slot-value calculator 'last-read)
                            current))
       (t (progn
-           (let  ((tmp-power (* 3600000.0 (/ (- (slot-value current 'energy) (slot-value last 'energy))
-                                             (- (slot-value current 'timestamp) (slot-value last 'timestamp))))))
+           (let*  ((energy-diff (- (energy current) (energy last)))
+                   (time-diff (- (timestamp current) (timestamp last)))
+                   (tmp-power (if (= 0 time-diff)
+                                  0 ;; we don't want to divide by 0
+                                  (* *meter-transformer-ratio* +time-diff-factor+ (/ energy-diff
+                                                  time-diff)))))
              (when (not (= 0 tmp-power))
                (setf (power calculator) tmp-power)
                (setf (last-read calculator) current)
@@ -118,15 +123,18 @@ Is in use only when `loop-running-p' is T.")
   (incf (slot-value reader 'energy-log) (random 100.0))
   (generate-meter-reading (cdr (assoc :data `((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
                                               (:DATA
-                                               ((:UUID . ,uri) (:LAST . ,(get-universal-time))
-                                                               (:INTERVAL . -1) (:PROTOCOL . "d0") (:TUPLES (,(get-universal-time) ,(slot-value reader 'energy-log))))))))))
+                                               ((:UUID . ,uri)
+                                                (:LAST . ,(get-universal-time))
+                                                (:INTERVAL . -1)
+                                                (:PROTOCOL . "d0")
+                                                (:TUPLES (,(get-universal-time) ,(slot-value reader 'energy-log))))))))))
 
 (defmethod query-api ((reader meter-request) uri)
   "does sth like (cl-json:decode-json-from-string (map 'string #'code-char (drakma:http-request 'http://192.168.2.71:8770/uri')))"
   (error "Implement me"))
 
 (defun generate-meter-reading (reading)
-  "READING has to provide :uuid and :tuples"
+  "`reading' has to provide :uuid and :tuples. Creates a result of type `meter-reading'."
   (let* ((uid (cdr (assoc :uuid (car reading)))))
     (multiple-value-bind (ti energy) (tuple-unpack (assoc :tuples (car reading)))
       (make-instance 'meter-reading
