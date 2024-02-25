@@ -9,4 +9,15 @@
    :*http-acceptor*
    :*uid-obis-code-alist*
    :*power-calculation-alist*
-   :power-calculation-with-uid))
+   :*server-host-ip*
+   :power-calculation-with-uid
+   :power-calculation
+   :power ;; the accessor function
+   :meter-reading
+   :restapi-request-service
+   :meter-request-mock
+   :meter-request
+   :power-calculator
+   :calculate-power
+   :query-api
+   ))

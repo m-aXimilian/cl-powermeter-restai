@@ -4,27 +4,36 @@
   ((uuid
     :initarg :uuid
     :initform (error "Cannot instantiate without uid.")
+    :accessor uuid
     :documentation "The uid of the calculation.")
    (timestamp
     :initarg :timestamp
+    :accessor timestamp
     :documentation "The timestamp of the calculation. A unix timestamp.")
    (power
     :initarg :power
-    :documentation "The calcuated power (in kW).")))
+    :initform nil
+    :accessor power
+    :documentation "The calcuated power (in kW)."))
+  (:documentation "Type to be used for passing power claculation results."))
 
 (defclass meter-reading ()
   ((uuid
     :initarg :uuid
     :initform (error "UUID must be provided.")
+    :accessor uuid
     :documentation "The identifier of the meter channel.")
    (timestamp
     :initarg :timestamp
     :initform (error "TIMESTAMP must be provided.")
+    :accessor timestamp
     :documentation "The timestamp as provided by the reading (not calculated).")
    (energy
     :initarg :energy
     :initform (error "ENERGY must be provided")
-    :documentation "The actual reading in kWh.")))
+    :accessor energy
+    :documentation "The actual reading in kWh."))
+  (:documentation "Object representing a single read from an electricity meter."))
 
 (defclass restapi-request-service ()
   ((server-ip
@@ -36,16 +45,19 @@ can be used to query meter readings.")
     :initarg :server-port
     :initform 8080
     :documentation "The port of the RESTAPI. Defaults to 8080.")
-   ))
+   )
+  (:documentation "A generic interface exposing a rest api that can be used for GET http requests."))
 
 (defclass meter-request-mock (restapi-request-service)
   ((energy-log
     :initarg :energy-log
     :initform 0
-    :documentation "The saved energy reading to increment.")))
+    :documentation "The saved energy reading to increment."))
+  (:documentation "A mock implementation of `restapi-request-service'."))
 
 (defclass meter-request (restapi-request-service)
-  ())
+  ()
+  (:documentation "A production implementation of `restapi-request-service'."))
 
 (defclass power-calculator ()
   ((meter-api
@@ -55,20 +67,26 @@ can be used to query meter readings.")
     :documentation "A handler for calculating power from energy readings.")
    (last-read
     :initform nil
+    :accessor last-read
     :documentation "The last reading.")
    (power
+    :accessor power
     :type number
     :documentation "The calculated power.")
    (loop-running-p
     :initarg :loop-running-p
     :initform nil
+    :accessor loop-running-p
     :documentation "Statusflag inidicating whether the a query-loop is running.
 Setfable; when T, you can set it to NIL in order to stop the loop.")
    (query-frequency
     :initarg :query-frequency
     :initform 0.005
+    :accessor query-frequency
     :documentation "The frequency in Hz indicating a 'sleep' time for the loop.
-Is in use only when `loop-running-p' is T.")))
+Is in use only when `loop-running-p' is T.")
+   )
+  (:documentation "A power calculation handler based on restapi calls."))
 
 (defgeneric query-api (reader uri)
   (:documentation "Get a json encoded api response from the url specified in `uri'."))
@@ -87,10 +105,10 @@ Is in use only when `loop-running-p' is T.")))
            (let  ((tmp-power (* 3600000.0 (/ (- (slot-value current 'energy) (slot-value last 'energy))
                                              (- (slot-value current 'timestamp) (slot-value last 'timestamp))))))
              (when (not (= 0 tmp-power))
-               (setf (slot-value calculator 'power) tmp-power)
-               (setf (slot-value calculator 'last-read) current)
-               (setf (slot-value (power-calculation-with-uid uid) 'power) tmp-power)
-               (setf (slot-value (power-calculation-with-uid uid) 'timestamp) (slot-value current 'timestamp)))))))))
+               (setf (power calculator) tmp-power)
+               (setf (last-read calculator) current)
+               (setf (power (power-calculation-with-uid uid)) tmp-power)
+               (setf (timestamp (power-calculation-with-uid uid)) (timestamp current)))))))))
 
 (defmethod query-api ((reader restapi-request-service) uri)
   (error "query-api is not defined on the interface."))
