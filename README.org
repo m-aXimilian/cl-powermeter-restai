@@ -6,10 +6,10 @@
 Using and IR interface on a electricity meter in combination with [[https://wiki.volkszaehler.org/software/controller/vzlogger/overview_en][vzlogger]] for many meter models only gives /energy/ readings. There is however no direct way to derive a (mean) /power/ from subsequent readings.
 This project aims to provide this power for different vzlogger "channels".
 The following simple equation is used as the basis
-$P = \frac{E_{current} - E_{last}}{T_{current} - T{last}}$
+$P = \frac{E_{current} - E_{last}}{T_{current} - T_{last}}$
 
 There is a mock api interface that increments an energy meter with a "constant power". For this, the following is used
-$E_{current} = [P \cdot (T_{current} - T{last})] + E_{last}$
+$E_{current} = [P \cdot (T_{current} - T_{last})] + E_{last}$
 
 ** Usage
 Depends on [[https://www.quicklisp.org/beta/][quicklisp]].
