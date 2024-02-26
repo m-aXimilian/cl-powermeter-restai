@@ -48,7 +48,7 @@ can be used to query meter readings.")
    (parser
     :initarg :parser
     :initform (if *default-reastapi-parser*
-                  *default-reastap-parser*
+                  *default-reastapi-parser*
                   (lambda (req) (identity req)))
     :accessor parser
     :type function
