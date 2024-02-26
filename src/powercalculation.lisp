@@ -47,7 +47,7 @@ can be used to query meter readings.")
     :documentation "The port of the RESTAPI. Defaults to 8080.")
    (parser
     :initarg :parser
-    :initform (if *default-reastap-parser*
+    :initform (if *default-reastapi-parser*
                   *default-reastap-parser*
                   (lambda (req) (identity req)))
     :accessor parser

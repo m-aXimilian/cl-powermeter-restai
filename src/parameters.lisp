@@ -33,7 +33,7 @@ from an api that can be called to fetch (json) data for the respective codes.")
 (defparameter *meter-reading-port* nil
   "The port of the meter reading api.")
 
-(defparameter *default-reastap-parser* (lambda (req) (identity req))
+(defparameter *default-reastapi-parser* (lambda (req) (identity req))
   "A function used to parse the reslut of an api GET request.")
 
 (defparameter *meter-transformer-ratio* 20
