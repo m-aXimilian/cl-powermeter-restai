@@ -16,4 +16,4 @@
 (slot-value (query-api meter-mock (car (first *uid-obis-code-alist*))) 'energy)
 
 (calculate-power calculato (car (first *uid-obis-code-alist*)))
-
+;; (power (power-calculation-with-uid (car (first *uid-obis-code-alist*))))

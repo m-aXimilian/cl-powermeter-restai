@@ -121,31 +121,34 @@ Is in use only when `loop-running-p' is T.")
 (defmethod query-api ((reader meter-request-mock) uri)
   "Random data containing the `uri'."
   (incf (slot-value reader 'energy-log) (random 100.0))
-  (generate-meter-reading (cdr (assoc :data `((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
-                                              (:DATA
-                                               ((:UUID . ,uri)
-                                                (:LAST . ,(get-universal-time))
-                                                (:INTERVAL . -1)
-                                                (:PROTOCOL . "d0")
-                                                (:TUPLES (,(get-universal-time) ,(slot-value reader 'energy-log))))))))))
+  (generate-meter-reading `(((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
+                             (:DATA
+                              ((:UUID . ,uri)
+                               (:LAST . ,(get-universal-time))
+                               (:INTERVAL . -1)
+                               (:PROTOCOL . "d0")
+                               (:TUPLES (,(get-universal-time) ,(slot-value reader 'energy-log)))))))))
 
 (defmethod query-api ((reader meter-request) uri)
   "does sth like (cl-json:decode-json-from-string (map 'string #'code-char (drakma:http-request 'http://192.168.2.71:8770/uri')))"
   (error "Implement me"))
 
+;; depending on what we get from the real api, this has to be adapted eventually
 (defun generate-meter-reading (reading)
   "`reading' has to provide :uuid and :tuples. Creates a result of type `meter-reading'."
-  (let* ((uid (cdr (assoc :uuid (car reading)))))
-    (multiple-value-bind (ti energy) (tuple-unpack (assoc :tuples (car reading)))
-      (make-instance 'meter-reading
-		     :uuid uid
-		     :timestamp ti
-		     :energy energy))))
-
-(defun tuple-unpack (c)
-  (let ((l (car (cdr c))))
-    (values (car l)
-	    (car (cdr l)))))
+  (labels ((tuple-unpack (c)
+             (let ((l (car (cdr c))))
+               (values (car l)
+                       (car (cdr l)))))
+           (extract-data (r)
+             (cdr (assoc :data (car r)))))
+    (let* ((data (extract-data reading))
+           (uid (cdr (assoc :uuid (car data)))))
+      (multiple-value-bind (ti energy) (tuple-unpack (assoc :tuples (car data)))
+        (make-instance 'meter-reading
+                       :uuid uid
+                       :timestamp ti
+                       :energy energy)))))
 
 ;; this is from cl-prototypes
 ;; try to not depend on drakma here and use usocket insteas as it is alreay part of hunchentoot
