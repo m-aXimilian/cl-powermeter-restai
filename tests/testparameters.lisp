@@ -55,6 +55,23 @@ from an api that can be called to fetch (json) data for the respective codes.")
     :documentation "Time between api-calls."))
   (:documentation "A mock implementation of `restapi-request-service' with energy increments of a fixed power."))
 
+(defmethod initialize-instance :after ((reader meter-request-mock-constant-power) &key)
+  (setf (parser reader)
+        (lambda (reading)
+          (labels ((tuple-unpack (c)
+                     (let ((l (car (cdr c))))
+                       (values (car l)
+                               (car (cdr l)))))
+                   (extract-data (r)
+                     (cdr (assoc :data (car r)))))
+            (let* ((data (extract-data reading))
+                   (uid (cdr (assoc :uuid (car data)))))
+              (multiple-value-bind (ti energy) (tuple-unpack (assoc :tuples (car data)))
+                (make-instance 'meter-reading
+                               :uuid uid
+                               :timestamp ti
+                               :energy energy)))))))
+
 (defmethod query-api ((reader meter-request-mock-constant-power) uri)
   "Ensures an energy increment to target a static mean power in `uri'."
   (labels ((get-energy-inc (reader)
@@ -63,7 +80,7 @@ from an api that can be called to fetch (json) data for the respective codes.")
                      (+ (* (target-power reader) (/ (- now (timestamp (last-read reader))) 3600000)) (energy (last-read reader)))))))
     (cond
       ((eq nil (last-read reader))
-       (let ((initial (cl.powermeter.restapi::generate-meter-reading `(((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
+       (let ((initial (funcall (parser reader) `(((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
                                                                         (:DATA
                                                                          ((:UUID . ,uri)
                                                                           (:LAST . ,(get-universal-time))
@@ -73,7 +90,7 @@ from an api that can be called to fetch (json) data for the respective codes.")
          (setf (last-read reader) initial)
          initial))
       (t (let ((needed-inc (get-energy-inc reader)))
-           (cl.powermeter.restapi::generate-meter-reading `(((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
+           (funcall (parser reader) `(((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
                                                              (:DATA
                                                               ((:UUID . ,uri)
                                                                (:LAST . ,(car needed-inc))

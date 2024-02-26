@@ -45,7 +45,14 @@ can be used to query meter readings.")
     :initarg :server-port
     :initform 8080
     :documentation "The port of the RESTAPI. Defaults to 8080.")
-   )
+   (parser
+    :initarg :parser
+    :initform (if *default-reastap-parser*
+                  *default-reastap-parser*
+                  (lambda (req) (identity req)))
+    :accessor parser
+    :type function
+    :documentation "The function used to parse a GET request."))
   (:documentation "A generic interface exposing a rest api that can be used for GET http requests."))
 
 (defclass meter-request-mock (restapi-request-service)
@@ -92,7 +99,6 @@ Is in use only when `loop-running-p' is T.")
 (defgeneric query-api (reader uri)
   (:documentation "Get a json encoded api response from the url specified in `uri'."))
 
-
 (defgeneric calculate-power (calculator uid)
   (:documentation "Calculate power from subsequent meter readings."))
 
@@ -115,13 +121,33 @@ Is in use only when `loop-running-p' is T.")
                (setf (power (power-calculation-with-uid uid)) tmp-power)
                (setf (timestamp (power-calculation-with-uid uid)) (timestamp current)))))))))
 
+;; depending on what we get from the real api, this has to be
+;; ⚠️ adapted eventually
+;; ✅ simply recycled, i.e., also used as the parser for the production restapi-handler
+(defmethod initialize-instance :after ((reader restapi-request-service) &key)
+  (setf (parser reader)
+        (lambda (reading)
+          (labels ((tuple-unpack (c)
+                     (let ((l (car (cdr c))))
+                       (values (car l)
+                               (car (cdr l)))))
+                   (extract-data (r)
+                     (cdr (assoc :data (car r)))))
+            (let* ((data (extract-data reading))
+                   (uid (cdr (assoc :uuid (car data)))))
+              (multiple-value-bind (ti energy) (tuple-unpack (assoc :tuples (car data)))
+                (make-instance 'meter-reading
+                               :uuid uid
+                               :timestamp ti
+                               :energy energy)))))))
+
 (defmethod query-api ((reader restapi-request-service) uri)
   (error "query-api is not defined on the interface."))
 
 (defmethod query-api ((reader meter-request-mock) uri)
   "Random data containing the `uri'."
   (incf (slot-value reader 'energy-log) (random 100.0))
-  (generate-meter-reading `(((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
+  (funcall (parser reader) `(((:VERSION . "0.8.1") (:GENERATOR . "vzlogger")
                              (:DATA
                               ((:UUID . ,uri)
                                (:LAST . ,(get-universal-time))
@@ -132,23 +158,6 @@ Is in use only when `loop-running-p' is T.")
 (defmethod query-api ((reader meter-request) uri)
   "does sth like (cl-json:decode-json-from-string (map 'string #'code-char (drakma:http-request 'http://192.168.2.71:8770/uri')))"
   (error "Implement me"))
-
-;; depending on what we get from the real api, this has to be adapted eventually
-(defun generate-meter-reading (reading)
-  "`reading' has to provide :uuid and :tuples. Creates a result of type `meter-reading'."
-  (labels ((tuple-unpack (c)
-             (let ((l (car (cdr c))))
-               (values (car l)
-                       (car (cdr l)))))
-           (extract-data (r)
-             (cdr (assoc :data (car r)))))
-    (let* ((data (extract-data reading))
-           (uid (cdr (assoc :uuid (car data)))))
-      (multiple-value-bind (ti energy) (tuple-unpack (assoc :tuples (car data)))
-        (make-instance 'meter-reading
-                       :uuid uid
-                       :timestamp ti
-                       :energy energy)))))
 
 ;; this is from cl-prototypes
 ;; try to not depend on drakma here and use usocket insteas as it is alreay part of hunchentoot
