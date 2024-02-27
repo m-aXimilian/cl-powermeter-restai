@@ -32,13 +32,8 @@ from an api that can be called to fetch (json) data for the respective codes.")
     (&body)
     (setf *power-calculation-alist* restore)))
 
-(defclass meter-request-mock-constant-power (restapi-request-service)
-  ((energy-log
-    :initarg :energy-log
-    :initform 0
-    :accessor energy-log
-    :documentation "The saved energy reading to increment.")
-   (last-read
+(defclass meter-request-mock-constant-power (meter-request-mock)
+  ((last-read
     :initarg :last-read
     :initform nil
     :accessor last-read
@@ -55,23 +50,6 @@ from an api that can be called to fetch (json) data for the respective codes.")
     :documentation "Time between api-calls."))
   (:documentation "A mock implementation of `restapi-request-service' with energy increments of a fixed power."))
 
-(defmethod initialize-instance :after ((reader meter-request-mock-constant-power) &key)
-  (setf (parser reader)
-        (lambda (reading)
-          (labels ((tuple-unpack (c)
-                     (let ((l (car (cdr c))))
-                       (values (car l)
-                               (car (cdr l)))))
-                   (extract-data (r)
-                     (cdr (assoc :data (car r)))))
-            (let* ((data (extract-data reading))
-                   (uid (cdr (assoc :uuid (car data)))))
-              (multiple-value-bind (ti energy) (tuple-unpack (assoc :tuples (car data)))
-                (make-instance 'meter-reading
-                               :uuid uid
-                               :timestamp ti
-                               :energy energy)))))))
-
 (defmethod query-api ((reader meter-request-mock-constant-power) uri)
   "Ensures an energy increment to target a static mean power in `uri'."
   (labels ((get-energy-inc (reader)
@@ -86,7 +64,7 @@ from an api that can be called to fetch (json) data for the respective codes.")
                                                                           (:LAST . ,(get-universal-time))
                                                                           (:INTERVAL . -1)
                                                                           (:PROTOCOL . "d0")
-                                                                          (:TUPLES (,(get-universal-time) ,(slot-value reader 'energy-log))))))))))
+                                                                          (:TUPLES (,(get-universal-time) ,(slot-value reader 'cl.powermeter.restapi::energy-log))))))))))
          (setf (last-read reader) initial)
          initial))
       (t (let ((needed-inc (get-energy-inc reader)))
