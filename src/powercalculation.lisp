@@ -112,14 +112,15 @@ Is in use only when `loop-running-p' is T.")
            (let*  ((energy-diff (- (energy current) (energy last)))
                    (time-diff (- (timestamp current) (timestamp last)))
                    (tmp-power (if (= 0 time-diff)
-                                  0 ;; we don't want to divide by 0
+                                  nil ;; we don't want to divide by 0
                                   (* *meter-transformer-ratio* +time-diff-factor+ (/ energy-diff
                                                   time-diff)))))
-             (when (not (= 0 tmp-power))
-               (setf (power calculator) tmp-power)
-               (setf (last-read calculator) current)
-               (setf (power (power-calculation-with-uid uid)) tmp-power)
-               (setf (timestamp (power-calculation-with-uid uid)) (timestamp current)))))))))
+             (if tmp-power
+                 (progn (setf (power calculator) tmp-power)
+                        (setf (last-read calculator) current)
+                        (setf (power (power-calculation-with-uid uid)) tmp-power)
+                        (setf (timestamp (power-calculation-with-uid uid)) (timestamp current)))
+                 (progn (setf (last-read calculator) current)))))))))
 
 ;; depending on what we get from the real api, this has to be
 ;; ⚠️ adapted eventually
