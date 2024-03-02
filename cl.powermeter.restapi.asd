@@ -4,6 +4,7 @@
   :mailto "kueffnermax@gmail.com"
   :license "LGPL"
   :depends-on ("hunchentoot"
+               "drakma"
 	       "cl-json"
                "bordeaux-threads")
   :components ((:module "src"

@@ -8,6 +8,7 @@
 ;; call like ttp://10.168.50.28:8771/?power=a039408b-b369-40f2-ba22-c20bdf4b24fb
 (defun setup-power-handler ()
   (hunchentoot:define-easy-handler (power-disptacher :uri "/") (power)
+    (setf (hunchentoot:content-type*) "application/json")
     (format nil "~a" (json-string-from-calculation (power-calculation-with-uid power)))))
 
 (defun start-server ()
