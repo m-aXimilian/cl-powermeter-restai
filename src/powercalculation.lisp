@@ -39,11 +39,13 @@
   ((server-ip
     :initarg :server-ip
     :initform (error "Need a server to query.")
+    :accessor server-ip
     :documentation "The IP address of a (reachable) RESTAPI that
 can be used to query meter readings.")
    (server-port
     :initarg :server-port
     :initform 8080
+    :accessor server-port
     :documentation "The port of the RESTAPI. Defaults to 8080.")
    (parser
     :initarg :parser
@@ -73,10 +75,10 @@ can be used to query meter readings.")
     :initform (error "You have to provide an API to query the meter readings.")
     :type restapi-request-service
     :documentation "A handler for calculating power from energy readings.")
-   (last-read
+   (last-reads
     :initform nil
-    :accessor last-read
-    :documentation "The last reading.")
+    :accessor last-reads
+    :documentation "An alist of last readings.")
    (power
     :accessor power
     :type number
@@ -84,7 +86,7 @@ can be used to query meter readings.")
    (loop-running-p
     :initarg :loop-running-p
     :initform nil
-    :accessor loop-running-p
+    :reader loop-running-p
     :documentation "Statusflag inidicating whether the a query-loop is running.
 Setfable; when T, you can set it to NIL in order to stop the loop.")
    (query-frequency
@@ -93,7 +95,15 @@ Setfable; when T, you can set it to NIL in order to stop the loop.")
     :accessor query-frequency
     :documentation "The frequency in Hz indicating a 'sleep' time for the loop.
 Is in use only when `loop-running-p' is T.")
-   )
+   (parser
+    :initarg :parser
+    :initform (lambda (calc)
+                (dolist (key *uid-obis-code-alist*)
+                  (calculate-power calc (car key))
+                  ;; (format t "~a: ~a~%" (car key) (power (power-calculation-with-uid (car key))))
+                  ))
+    :accessor parser
+    :documentation "Function for parsing the api call results from `meter-api'."))
   (:documentation "A power calculation handler based on restapi calls."))
 
 (defgeneric query-api (reader uri)
@@ -102,25 +112,47 @@ Is in use only when `loop-running-p' is T.")
 (defgeneric calculate-power (calculator uid)
   (:documentation "Calculate power from subsequent meter readings."))
 
+(defgeneric start-calculation-loop (calculator)
+  (:documentation "Start the calculator loop."))
+
+(defgeneric stop-calculation-loop (calculator)
+  (:documentation "Stop the calculator loop."))
+
+(defmethod start-calculation-loop ((calculator power-calculator))
+  (setf (slot-value calculator 'loop-running-p) t)
+  (let* ((calc-thread (bt:make-thread
+                       (lambda ()
+                         (loop
+                           (progn
+                             (if (loop-running-p calculator)
+                                 (progn
+                                   (funcall (parser calculator) calculator)
+                                   (sleep (/ 1.0 (query-frequency calculator))))
+                                 (return nil)))))
+                       :name "calc-thread")))
+    calc-thread))
+
+(defmethod stop-calculation-loop ((calculator power-calculator))
+  (setf (slot-value calculator 'loop-running-p) nil))
+
 (defmethod calculate-power ((calculator power-calculator) uid)
-  (let ((last (slot-value calculator 'last-read))
+  (let ((last (assoc uid (last-reads calculator) :test 'equal))
         (current (query-api (slot-value calculator 'meter-api) uid)))
     (cond
-      ((eq last nil) (setf (slot-value calculator 'last-read)
-                           current))
+      ((eq last nil) (push `(,uid . ,current) (last-reads calculator)))
       (t (progn
-           (let*  ((energy-diff (- (energy current) (energy last)))
-                   (time-diff (- (timestamp current) (timestamp last)))
+           (let*  ((energy-diff (- (energy current) (energy (cdr last))))
+                   (time-diff (- (timestamp current) (timestamp (cdr last))))
                    (tmp-power (if (= 0 time-diff)
                                   nil ;; we don't want to divide by 0
                                   (* *meter-transformer-ratio* +time-diff-factor+ (/ energy-diff
                                                   time-diff)))))
              (if tmp-power
                  (progn (setf (power calculator) tmp-power)
-                        (setf (last-read calculator) current)
+                        (setf (cdr (assoc uid (last-reads calculator) :test 'equal)) current)
                         (setf (power (power-calculation-with-uid uid)) tmp-power)
                         (setf (timestamp (power-calculation-with-uid uid)) (timestamp current)))
-                 (progn (setf (last-read calculator) current)))))))))
+                 (progn (setf (cdr (assoc uid (last-reads calculator) :test 'equal)) current)))))))))
 
 ;; depending on what we get from the real api, this has to be
 ;; ⚠️ adapted eventually

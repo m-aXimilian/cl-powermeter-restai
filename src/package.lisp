@@ -17,6 +17,7 @@
    :power ;; the accessor function
    :timestamp ;; the accessor function
    :energy ;; the accessor function
+   :query-frequency
    :parser
    :meter-reading
    :restapi-request-service
