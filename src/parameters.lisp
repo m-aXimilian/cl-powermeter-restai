@@ -3,7 +3,7 @@
 (defconstant +time-diff-factor+ 3600000.0
   "Factor to get from ms and W to h and kW.")
 
-(defparameter *server-host-ip* "localhost"
+(defparameter *server-host-ip* "192.168.2.71"
   "The ip address that gets served.")
 
 (defparameter *server-host-port-power-calculations* 8771

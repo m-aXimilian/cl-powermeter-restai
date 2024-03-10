@@ -189,8 +189,10 @@ Is in use only when `loop-running-p' is T.")
                                (:TUPLES (,(get-universal-time) ,(slot-value reader 'energy-log)))))))))
 
 (defmethod query-api ((reader meter-request) uri)
-  "does sth like (cl-json:decode-json-from-string (map 'string #'code-char (drakma:http-request 'http://192.168.2.71:8770/uri')))"
-  (error "Implement me"))
+  (let ((req (concatenate 'string "http://" (server-ip reader) ":" (format nil "~a" (server-port reader)) "/" uri)))
+    ;; (format t "~a" req)
+    (funcall (parser reader)
+             (list (cl-json:decode-json-from-string (map 'string #'code-char (drakma:http-request req)))))))
 
 ;; this is from cl-prototypes
 ;; try to not depend on drakma here and use usocket insteas as it is alreay part of hunchentoot
