@@ -1,7 +1,13 @@
-LISP ?= sbcl --noinform
+LISP ?= sbcl --noinform --non-interactive
+
+build:
+	$(LISP) --eval '(asdf:load-asd (merge-pathnames (uiop/os:getcwd) "cl.powermeter.restapi.asd"))' \
+	--eval '(ql:quickload :cl.powermeter.restapi)' \
+	--eval '(asdf:make :cl.powermeter.restapi)' \
+	--eval '(quit)'
 
 test:
-	$(LISP) --non-interactive --eval '(asdf:load-asd (merge-pathnames (uiop/os:getcwd) "cl.powermeter.restapi.asd"))' \
+	$(LISP) --eval '(asdf:load-asd (merge-pathnames (uiop/os:getcwd) "cl.powermeter.restapi.asd"))' \
 	--eval '(uiop:chdir (merge-pathnames (uiop/os:getcwd) "tests"))' \
 	--eval '(ql:quickload :cl.powermeter.restapi/tests)' \
 	--eval '(in-package "CL.POWERMETER.RESTAPI/TESTS")' \

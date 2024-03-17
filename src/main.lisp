@@ -12,4 +12,5 @@
   (initialize-power-calculations :reset t)
   (setup-power-handler)
   (start-server)
-  (start-calculation-loop global-calculator))
+  (start-calculation-loop global-calculator)
+  (sleep most-positive-fixnum))

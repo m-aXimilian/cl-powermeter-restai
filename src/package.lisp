@@ -26,4 +26,5 @@
    :power-calculator
    :calculate-power
    :query-api
+   :main
    ))

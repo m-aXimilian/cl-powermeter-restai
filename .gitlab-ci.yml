@@ -20,3 +20,14 @@ sbcl test:
   extends: .test
   variables:
     LISP: sbcl
+
+build:
+  stage: build
+  variables:
+    LISP: sbcl
+  script:
+    - make build
+  artifacts:
+    expire_in: 30 days
+    paths:
+      - build/cl-powermeter-restapi

@@ -16,6 +16,9 @@
                  (:file "httpserver")
                  (:file "main"))))
   :description ""
+  :build-operation "program-op"
+  :build-pathname "build/cl-powermeter-restapi"
+  :entry-point "cl.powermeter.restapi:main"
   :in-order-to ((test-op (test-op "cl.powermeter.restapi/tests"))))
 
 (defsystem "cl.powermeter.restapi/tests"
