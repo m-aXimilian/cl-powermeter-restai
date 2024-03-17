@@ -7,6 +7,7 @@ image: clfoundation/$LISP:$IMAGE_TAG
 
 stages:
   - test
+  - build
 
 before_script:
   - install-quicklisp
