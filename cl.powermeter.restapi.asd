@@ -6,7 +6,8 @@
   :depends-on ("hunchentoot"
                "drakma"
 	       "cl-json"
-               "bordeaux-threads")
+               "bordeaux-threads"
+               "parse-float")
   :components ((:module "src"
                 :components
                 ((:file "package")
