@@ -1,5 +1,7 @@
 (defpackage cl.powermeter.restapi
   (:use :cl :hunchentoot :cl-json)
+  (:import-from :parse-float
+                :parse-float)
   (:export
    :obis->uid
    :uid->obis

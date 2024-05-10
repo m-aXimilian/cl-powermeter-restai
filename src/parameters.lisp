@@ -39,6 +39,11 @@ from an api that can be called to fetch (json) data for the respective codes.")
 (defparameter *meter-transformer-ratio* 20
   "The transformer ratio used with the electricity meter.")
 
+(defparameter *frequency-dispatcher-list* nil
+  "List of functions to call when a frequency update is raised.
+
+Connects to the dispatcher function `update-frequency'.")
+
 (defun obis->uid (obis &optional (uid-obis-map *uid-obis-code-alist*))
   "Gives the corresponding uid for a given `obis' code.
 
@@ -52,3 +57,22 @@ paramter for `uid-obis-map' is provided"
 By default, `*uid-obis-code-alist*' will be used to fetch the uid when no
 paramter for `uid-obis-map' is provided"
   (cdr (assoc uid uid-obis-map :test 'equal)))
+
+(defun update-frequency (hz)
+  "Dispatch a `hz' parameter to a list of subscribers.
+
+The subscriber functions have to be stored in the `*frequency-dispatcher-list*' variable.
+New functions that are pushed to this variable should have the same signature
+(i.e. take a `hz' parameter as a first argument). If that is not the case, the funcall
+operation will fail (as long as further parameters of the subscriber function are not
+optional or provide defaults).
+Attention: this mechanism is stupid: there is no check whatsoever, if a function
+is already present in the list before adding a new one. Removal is not possible
+(only resetting).
+
+Example:
+(push (lambda (hz)
+        (format t \"Setting frequency to ~d~%\" hz))
+      *frequency-dispatcher-list*)"
+  (dolist (f *frequency-dispatcher-list*)
+    (funcall f hz)))
